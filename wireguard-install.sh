@@ -160,17 +160,6 @@ function installQuestions() {
 		read -rp "Server WireGuard port [1-65535]: " -e -i "${RANDOM_PORT}" SERVER_PORT
 	done
 
-	# Adguard DNS by default
-	until [[ ${CLIENT_DNS_1} =~ ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$ ]]; do
-		read -rp "First DNS resolver to use for the clients: " -e -i 1.1.1.1 CLIENT_DNS_1
-	done
-	until [[ ${CLIENT_DNS_2} =~ ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$ ]]; do
-		read -rp "Second DNS resolver to use for the clients (optional): " -e -i 1.0.0.1 CLIENT_DNS_2
-		if [[ ${CLIENT_DNS_2} == "" ]]; then
-			CLIENT_DNS_2="${CLIENT_DNS_1}"
-		fi
-	done
-
 	until [[ ${ALLOWED_IPS} =~ ^.+$ ]]; do
 		echo -e "\nWireGuard uses a parameter called AllowedIPs to determine what is routed over the VPN."
 		read -rp "Allowed IPs list for generated clients (leave default to route everything): " -e -i '0.0.0.0/0,::/0' ALLOWED_IPS
@@ -248,8 +237,6 @@ SERVER_WG_IPV6=${SERVER_WG_IPV6}
 SERVER_PORT=${SERVER_PORT}
 SERVER_PRIV_KEY=${SERVER_PRIV_KEY}
 SERVER_PUB_KEY=${SERVER_PUB_KEY}
-CLIENT_DNS_1=${CLIENT_DNS_1}
-CLIENT_DNS_2=${CLIENT_DNS_2}
 ALLOWED_IPS=${ALLOWED_IPS}" >/etc/wireguard/params
 
 	# Add server interface
@@ -401,7 +388,6 @@ function newClient() {
 	echo "[Interface]
 PrivateKey = ${CLIENT_PRIV_KEY}
 Address = ${CLIENT_WG_IPV4}/32,${CLIENT_WG_IPV6}/128
-DNS = ${CLIENT_DNS_1},${CLIENT_DNS_2}
 
 [Peer]
 PublicKey = ${SERVER_PUB_KEY}
